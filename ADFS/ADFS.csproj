@@ -4,11 +4,12 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>nwth.ADFS</AssemblyName>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.1.0.18</Version>
+    <Version>1.1.0.19</Version>
     <Company>NWTH</Company>
-    <AssemblyVersion>1.1.0.18</AssemblyVersion>
-    <FileVersion>1.1.0.18</FileVersion>
+    <AssemblyVersion>1.1.0.19</AssemblyVersion>
+    <FileVersion>1.1.0.19</FileVersion>
     <Description>Авторизация в Web приложении при помощи ADFS</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup>
