@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>nwth.adfs</id>
+    <version>1.0.0.1</version>
+    <title>NWTH ADFS Package</title>
+    <authors>DK</authors>
+    <owners>DK</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Описание</description>
+    <releaseNotes>Summary of changes made in this release of the package.</releaseNotes>
+    <copyright>Copyright 2018</copyright>
+    <tags>ADFS</tags>
+  </metadata>
+</package>
