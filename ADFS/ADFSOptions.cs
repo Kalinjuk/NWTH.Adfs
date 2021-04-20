@@ -33,6 +33,7 @@ namespace nwth.ADFS
         private void init()
         {
             SaveTokens = false;
+            this.CorrelationCookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Strict;
             CallbackPath = new PathString("/signin");
         }
 
@@ -41,7 +42,7 @@ namespace nwth.ADFS
         public ADFSOptions(string Server)
         {
             init();
-            this.Server = Server;
+            this.Server = Server;            
         }
 
         public override void Validate()
