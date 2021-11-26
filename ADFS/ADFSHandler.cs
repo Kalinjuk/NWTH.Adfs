@@ -59,13 +59,16 @@ namespace nwth.ADFS
 
         }
 
-        protected override Task<HandleRequestResult> HandleRemoteAuthenticateAsync()
+
+
+        protected override async Task<HandleRequestResult> HandleRemoteAuthenticateAsync()
         {
-            return base.HandleRemoteAuthenticateAsync();
+            return await HandleRemoteAuthenticateAsync();
         }
 
         protected override Task<AuthenticateResult> HandleAuthenticateAsync()
         {
+            
             return base.HandleAuthenticateAsync();
         }
 
@@ -79,14 +82,12 @@ namespace nwth.ADFS
 
         protected override async Task<AuthenticationTicket> CreateTicketAsync(ClaimsIdentity identity, AuthenticationProperties properties, OAuthTokenResponse tokens)
         {
-            Logger.LogDebug($"Token: {tokens.AccessToken}");
+            //Logger.LogDebug($"Token: {tokens.AccessToken}");
 
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler
             {
                 MapInboundClaims = true
             };
-
-            //tokenHandler.
 
             //Читаем токен
             SecurityToken T = tokenHandler.ReadToken(tokens.AccessToken);
@@ -108,7 +109,7 @@ namespace nwth.ADFS
 
             var principal = tokenHandler.ValidateToken(tokens.AccessToken, V, out T);
 
-            _processor?.TicketCreated(new ADFSCreatingTiketContext(principal));                                    
+            await _processor?.TicketCreated(new ADFSCreatingTiketContext(principal));                                    
            
             return new AuthenticationTicket(principal, properties, Scheme.Name);
         }
