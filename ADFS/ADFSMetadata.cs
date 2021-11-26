@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading.Tasks;
 
 namespace nwth.ADFS
 {
@@ -28,7 +29,7 @@ namespace nwth.ADFS
             get
             {
                 Logger?.LogDebug("Get Signing Keys collection");
-                CheckKeys();
+                CheckKeys().Wait();
 
                 foreach (var key in Keys)
                 {
@@ -39,12 +40,12 @@ namespace nwth.ADFS
             }
         }
 
-        public X509Certificate2 GetCertificate(string ID)
+        public async Task<X509Certificate2> GetCertificate(string ID)
         {
             Logger?.LogDebug("GetCertificate");
             try
             {
-                CheckKeys();
+                await CheckKeys();
                 ADFSKey key = Keys.Where(p => p.x5t == ID ).FirstOrDefault();
                 if (key == null) throw new Exception("Bad server certificate");
                 X509Certificate2 res = new X509Certificate2(Convert.FromBase64String(key.x5c[0]));
@@ -59,18 +60,18 @@ namespace nwth.ADFS
 
 
 
-        private void CheckKeys()
+        private async Task CheckKeys()
         {
-            if (Keys == null) GetKeys();
+            if (Keys == null) await GetKeys();
         }
 
-        private void GetKeys()
+        private async Task GetKeys()
         {
             try
             {
                 using (WebClient wc = new WebClient())
                 {
-                    String S = wc.DownloadString(new Uri($"https://{_server}/adfs/discovery/keys"));
+                    String S = await wc.DownloadStringTaskAsync(new Uri($"https://{_server}/adfs/discovery/keys"));
 
                     ADFSReply reply = JsonConvert.DeserializeObject<ADFSReply>(S);
                     Keys = reply?.keys;

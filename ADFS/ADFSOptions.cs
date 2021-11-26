@@ -6,13 +6,15 @@ using System.Globalization;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.Internal;
 using Microsoft.AspNetCore.Authentication;
+using System.Threading.Tasks;
+using ADFS;
 
 namespace nwth.ADFS
 {
     public class ADFSOptions: OAuthOptions
     {
         private string _server;
-        public string Resource { get; set; }
+        public string Resource { get; set; }       
 
         public string Server
         {
@@ -45,13 +47,13 @@ namespace nwth.ADFS
             this.Server = Server;            
         }
 
+        
+
         public override void Validate()
         {
             base.Validate();
             if (string.IsNullOrEmpty(Resource))
-            {
                 throw new ArgumentException("Parametr Resource must be provide");
-            }
         }
 
     }

@@ -13,15 +13,23 @@ using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json.Linq;
+using ADFS;
 
 namespace nwth.ADFS
 {
     public class ADFSHandler<TOptions>: OAuthHandler<TOptions> where TOptions : ADFSOptions, new()
     {
-        private ADFSMetadata Metadata;
+        private readonly IAdfsAuthProcessor _processor;
 
-        public ADFSHandler(IOptionsMonitor<TOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock)
-            : base(options, logger, encoder, clock) {             
+        public ADFSHandler(IOptionsMonitor<TOptions> options, 
+            ILoggerFactory logger, 
+            UrlEncoder encoder, 
+            ISystemClock clock,
+            IAdfsAuthProcessor processor=null)
+            : base(options, logger, encoder, clock) {
+
+            _processor = processor;
         }
 
         
@@ -44,12 +52,30 @@ namespace nwth.ADFS
             };
 
             String S = QueryHelpers.AddQueryString(Options.AuthorizationEndpoint, parameters);
-            Debug.WriteLine("BuildChallengeUrl {0}", S);
+
+            Logger.LogDebug($"BuildChallengeUrl {S}");
 
             return QueryHelpers.AddQueryString(Options.AuthorizationEndpoint, parameters);
 
         }
 
+        protected override Task<HandleRequestResult> HandleRemoteAuthenticateAsync()
+        {
+            return base.HandleRemoteAuthenticateAsync();
+        }
+
+        protected override Task<AuthenticateResult> HandleAuthenticateAsync()
+        {
+            return base.HandleAuthenticateAsync();
+        }
+
+        
+
+
+        protected override Task HandleForbiddenAsync(AuthenticationProperties properties)
+        {
+            return base.HandleForbiddenAsync(properties);
+        }
 
         protected override async Task<AuthenticationTicket> CreateTicketAsync(ClaimsIdentity identity, AuthenticationProperties properties, OAuthTokenResponse tokens)
         {
@@ -60,11 +86,13 @@ namespace nwth.ADFS
                 MapInboundClaims = true
             };
 
+            //tokenHandler.
+
             //Читаем токен
             SecurityToken T = tokenHandler.ReadToken(tokens.AccessToken);
             string KeyName = (string)((JwtSecurityToken)T).Header["x5t"];
 
-            X509Certificate2 Cer = ADFSMetadata.Instance(Options.Server,Logger).GetCertificate(KeyName);
+            X509Certificate2 Cer = await ADFSMetadata.Instance(Options.Server,Logger).GetCertificate(KeyName);
             X509SecurityKey signingKey = new X509SecurityKey(Cer);
             
             TokenValidationParameters V = new TokenValidationParameters
@@ -75,9 +103,16 @@ namespace nwth.ADFS
                 ValidIssuer =Options.ValidIssuer,
                 ValidateIssuer = true,
             };
+                        
+            
 
-            var Principal = tokenHandler.ValidateToken(tokens.AccessToken, V, out T);
-            return new AuthenticationTicket(Principal, properties, Scheme.Name);
+            var principal = tokenHandler.ValidateToken(tokens.AccessToken, V, out T);
+
+            _processor?.TicketCreated(new ADFSCreatingTiketContext(principal));                                    
+           
+            return new AuthenticationTicket(principal, properties, Scheme.Name);
         }
+
+
     }
 }
