@@ -28,5 +28,17 @@ namespace Microsoft.Extensions.DependencyInjection
             builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<TOptions>, OAuthPostConfigureOptions<TOptions, THandler>>());
             return builder.AddRemoteScheme<TOptions, THandler>(authenticationScheme, displayName, configureOptions);
         }
+
+
+
+
+        /*
+        public static AuthenticationBuilder AddADFS<TOptions, THandler>(this AuthenticationBuilder builder, string authenticationScheme)
+            where TOptions : ADFSOptions, new()            
+        {
+            return builder.AddRemoteScheme<TOptions, THandler>(authenticationScheme, OAuthDefaults.DisplayName, configureOptions);
+        }*/
+
+
     }
 }

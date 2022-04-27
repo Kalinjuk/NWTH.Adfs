@@ -27,11 +27,16 @@ namespace nwth.ADFS
             UrlEncoder encoder, 
             ISystemClock clock,
             IAdfsAuthProcessor processor=null)
-            : base(options, logger, encoder, clock) {
+            : base( options, logger, encoder, clock) {
 
+            if (Options == null)
+            {
+
+                //this.OptionsMonitor.CurrentValue;
+                //Options = options.CurrentValue;
+            }
             _processor = processor;
         }
-
         
 
         protected override string BuildChallengeUrl(AuthenticationProperties properties, string redirectUri)
@@ -63,7 +68,7 @@ namespace nwth.ADFS
 
         protected override async Task<HandleRequestResult> HandleRemoteAuthenticateAsync()
         {
-            return await HandleRemoteAuthenticateAsync();
+            return await base.HandleRemoteAuthenticateAsync();
         }
 
         protected override Task<AuthenticateResult> HandleAuthenticateAsync()
@@ -109,7 +114,10 @@ namespace nwth.ADFS
 
             var principal = tokenHandler.ValidateToken(tokens.AccessToken, V, out T);
 
-            await _processor?.TicketCreated(new ADFSCreatingTiketContext(principal));                                    
+            if (_processor != null)
+            {
+                await _processor?.TicketCreated(new ADFSCreatingTiketContext(principal));
+            }
            
             return new AuthenticationTicket(principal, properties, Scheme.Name);
         }

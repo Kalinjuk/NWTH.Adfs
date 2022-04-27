@@ -8,9 +8,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
+using ADFS.APIKeyAuth;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using nwth.ADFS;
 
 namespace TestADFS
 {
@@ -27,9 +29,9 @@ namespace TestADFS
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
-            services.AddTransient<IAdfsAuthProcessor,TestAdfsProcessor>();// < .AddTransient<>
+           //services.AddTransient<IAdfsAuthProcessor,TestAdfsProcessor>();// < .AddTransient<>
 
-            
+
 
             services.AddAuthentication(options =>
             {
@@ -42,18 +44,25 @@ namespace TestADFS
             .AddCookie(options =>
             {
                 options.ExpireTimeSpan = TimeSpan.FromSeconds(60 * 60 * 8); //Кука работает 8 часов. Надо заменить на время авторизации ADFS
-                                                                   //options.Cookie.SecurePolicy = new CookieSecurePolicy()
+                                                                            //options.Cookie.SecurePolicy = new CookieSecurePolicy()
                 options.Cookie.SameSite = SameSiteMode.Strict;
-             })
-            .AddADFS("ADFS", options =>
+            })
+            .AddADFS("ADFS",null)
+            /*, options =>
             {
-                options.Server = "oa.220v.ru";
-                options.ClientId = "45846f35-5c02-4669-99a5-eb91440cbf72";
-                options.ClientSecret = "cmB7m1zxP-ad3mf81OGKsU2oGaG73Y0M1oQlYDXT";
-                options.Resource = "VoxReplyGUI";
+                options.Server = "oa2.220v.ru";
+                options.ClientId = "8e6604b9-c270-47fd-9b47-2df822bedac5";
+                options.ClientSecret = "6dJxjFBH2wJdrWqDfujUfH8kDf9QLQaDbyaUu7ke";
+                options.Resource = "TestApp";
                 options.CorrelationCookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Strict;
                 options.AccessDeniedPath = "/home/accessDenied";
-            });
+            })*/
+            .AddApiKeySupport(options => { });
+
+            services.Configure<ADFSOptions>("ADFS",Configuration.GetSection("ADFSOptions"));
+
+           // services.AddScoped<ADFS.IAdfsAuthProcessor, ADFSLoginProcessor>();
+            services.AddSingleton<IGetApiKeyQuery, ApiKeyQuery>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

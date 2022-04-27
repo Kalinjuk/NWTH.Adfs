@@ -39,8 +39,17 @@ namespace ADFS.APIKeyAuth
             {
                 var claims = new List<Claim>
                 {
-                new Claim(ClaimTypes.Name, existingApiKey.Owner)
+                    new Claim(ClaimTypes.Name, existingApiKey.Owner)                    
                 };
+
+                if (existingApiKey.OwnerId != null && existingApiKey.OwnerId > 0)
+                    claims.Add(new Claim(ApiKeyAuthenticationDefaults.UserIdClaymType, existingApiKey.OwnerId.ToString()));
+                if (existingApiKey.Id != null && existingApiKey.Id > 0)
+                    claims.Add(new Claim(ApiKeyAuthenticationDefaults.KeyIdClaymType, existingApiKey.Id.ToString()));
+
+                foreach (var t in existingApiKey.Claims)
+                    claims.Add(new Claim(t.Key, t.Value.ToString()));
+
 
                 claims.AddRange(existingApiKey.Roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
